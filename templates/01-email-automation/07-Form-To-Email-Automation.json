@@ -1,0 +1,121 @@
+{
+  "name": "Form to Email Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-form-submit",
+        "responseMode": "lastNode"
+      },
+      "id": "36a1dfbc-d5ec-5c00-9a0c-fd8bd8f10458",
+      "name": "Form Submission Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Thank you for reaching out, {{ $json.body.name }}!",
+        "message": "=Hi {{ $json.body.name }},\\n\\nWe received your request regarding: \"{{ $json.body.interest }}\". A specialist will reach out within 24 hours.\\n\\nWarm regards,\\nCustomer Team"
+      },
+      "id": "b23743d0-eafe-5359-adcb-d3913949ff59",
+      "name": "Send User Confirmation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "ops@example.com",
+        "subject": "🚨 New Lead Form Submitted: {{ $json.body.name }}",
+        "message": "=New submission details:\\nName: {{ $json.body.name }}\\nEmail: {{ $json.body.email }}\\nMessage: {{ $json.body.message }}"
+      },
+      "id": "c1d82ce9-e1cb-510d-890e-4e21ebbddb69",
+      "name": "Notify Internal Ops Team",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"success\", \"message\": \"Form received successfully\"}"
+      },
+      "id": "b8c91844-215a-53af-95cd-99b6115be4bf",
+      "name": "Return Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Form Submission Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send User Confirmation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send User Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Notify Internal Ops Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Internal Ops Team": {
+      "main": [
+        [
+          {
+            "node": "Return Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "90c3adf2-361e-5b37-b041-ff8573b392a8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-007",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

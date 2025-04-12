@@ -1,0 +1,139 @@
+{
+  "name": "AI Auto Email Reply",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "is:unread -category:promotions"
+        }
+      },
+      "id": "734358e6-9486-50ca-af45-519bea90c570",
+      "name": "New Email Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze incoming email:\\nSubject: {{ $json.subject }}\\nFrom: {{ $json.from }}\\nBody: {{ $json.textPlain }}\\n\\nTask: 1) Classify category: [Support, Sales Inquiry, Partnership, Urgent, Spam]. 2) If not Spam, draft a polite, helpful reply on behalf of Support Team."
+      },
+      "id": "24a881c5-37c6-5b18-81bb-1f5737a881c8",
+      "name": "Gemini Email Classifier & Drafter",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.category }}",
+              "rightValue": "Spam",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "e0dc7f5a-3096-524b-a98d-dfebdaed3d11",
+      "name": "Check Category",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createDraft",
+        "threadId": "={{ $('New Email Trigger').item.json.threadId }}",
+        "message": "={{ $json.draftReply }}"
+      },
+      "id": "62b72fdf-e12b-5f94-88cc-07617f590f67",
+      "name": "Create Gmail Reply Draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Email Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini Email Classifier & Drafter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Email Classifier & Drafter": {
+      "main": [
+        [
+          {
+            "node": "Check Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Category": {
+      "main": [
+        [
+          {
+            "node": "Create Gmail Reply Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "714fccb5-12e2-5d99-8f55-13c6e17c3011",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-005",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

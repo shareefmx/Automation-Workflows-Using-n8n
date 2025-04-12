@@ -1,0 +1,171 @@
+{
+  "name": "Multi-Customer Email Sender",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "1f975343-a7d6-5f78-9a01-e567ace55296",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Customers",
+          "mode": "name"
+        }
+      },
+      "id": "6ee4a84d-0c39-52bd-ba14-76af69c87cd2",
+      "name": "Fetch Customer List",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const customer = $input.item.json;\nconst subject = `Exclusive Update for ${customer.name}`;\nconst body = `Hi ${customer.name},\\n\\nWe noticed you are exploring our automation tools. Here is your custom invite: https://example.com/invite?code=${customer.invite_code}\\n\\nBest,\\nThe Team`;\nreturn {\n  json: {\n    email: customer.email,\n    subject: subject,\n    body: body\n  }\n};"
+      },
+      "id": "4c3d1749-4f17-5445-b467-281b9c176e0a",
+      "name": "Personalize Email Template",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}"
+      },
+      "id": "a73f9d32-4856-50e7-8693-fe726c0b2ab0",
+      "name": "Throttled Send via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Customers",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Sent",
+            "SentAt": "={{ $now.toISO() }}"
+          }
+        }
+      },
+      "id": "34b36a97-dd06-5986-932a-36708c119ab0",
+      "name": "Update Delivery Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1100,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Customer List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Customer List": {
+      "main": [
+        [
+          {
+            "node": "Personalize Email Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Personalize Email Template": {
+      "main": [
+        [
+          {
+            "node": "Throttled Send via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Throttled Send via Gmail": {
+      "main": [
+        [
+          {
+            "node": "Update Delivery Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6e94b8fd-3b9b-593b-ae4a-2ce7bf59ca38",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-001",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

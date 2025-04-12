@@ -1,0 +1,148 @@
+{
+  "name": "Daily Email Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "d2a6bc39-69f8-5c2f-adab-90393a7baaf5",
+      "name": "Daily 6 PM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "q": "after:{{ $now.minus({ hours: 12 }).format('yyyy/MM/dd') }} is:unread"
+        }
+      },
+      "id": "c5cd9fb7-9bc5-5889-a3f3-1b804d7713ed",
+      "name": "Fetch Today's Unread Emails",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst textList = items.map(item => `From: ${item.json.from} | Subject: ${item.json.subject} | Snippet: ${item.json.snippet}`).join('\\n---\\n');\nreturn [{ json: { full_digest: textList, count: items.length } }];"
+      },
+      "id": "158a596b-0725-5f4c-ae76-dfe6c02436ad",
+      "name": "Aggregate Email Contents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an executive chief of staff. Review the following {{ $json.count }} emails received today:\\n{{ $json.full_digest }}\\n\\nGroup into: 1) Urgent Action Items, 2) Key Updates, 3) FYIs/Newsletters."
+      },
+      "id": "17d6d6fa-1b19-5a7b-b7a3-6f53d09fda69",
+      "name": "Gemini Digest Generator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "me@example.com",
+        "subject": "📋 Your Daily Executive Email Briefing",
+        "message": "={{ $json.output }}"
+      },
+      "id": "e0e9ea65-5cd9-5c23-aed0-2ee202f096e8",
+      "name": "Send Evening Briefing Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 6 PM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Today's Unread Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Today's Unread Emails": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Email Contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Email Contents": {
+      "main": [
+        [
+          {
+            "node": "Gemini Digest Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Digest Generator": {
+      "main": [
+        [
+          {
+            "node": "Send Evening Briefing Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "69e74b3a-041a-549e-928c-c2ec3826f903",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-010",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

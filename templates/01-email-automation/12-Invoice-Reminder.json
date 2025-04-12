@@ -1,0 +1,147 @@
+{
+  "name": "Invoice Reminder",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "f4ec8f3a-cc88-5b92-8945-5794ddd6a49d",
+      "name": "Weekday 9 AM Cron",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "INVOICES_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Invoices",
+          "mode": "name"
+        }
+      },
+      "id": "cb56a150-c060-5c29-b653-5e417c1d698d",
+      "name": "Read Invoices Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "Unpaid",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "299c1440-7dd7-5561-a2ab-e721b65f7d7a",
+      "name": "Filter Due or Overdue",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.ClientEmail }}",
+        "subject": "=Friendly Reminder: Invoice #{{ $json.InvoiceNumber }} Due",
+        "message": "=Dear {{ $json.ClientName }},\\n\\nThis is a friendly reminder that invoice #{{ $json.InvoiceNumber }} for ${{ $json.Amount }} is due on {{ $json.DueDate }}.\\n\\nPlease review your payment portal here: {{ $json.PaymentLink }}\\n\\nThank you!"
+      },
+      "id": "cf66a87e-d8b5-5215-ba96-bf529b6726c6",
+      "name": "Dispatch Payment Reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekday 9 AM Cron": {
+      "main": [
+        [
+          {
+            "node": "Read Invoices Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoices Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter Due or Overdue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Due or Overdue": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Payment Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d363fd64-fa21-552e-a638-7247cbe62712",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-012",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}
