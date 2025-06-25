@@ -1,0 +1,154 @@
+{
+  "name": "Complete AI Job Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "cf1b6078-9a09-5f4b-a9db-68f3649a0d26",
+      "name": "Inbound Job Alert Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an elite career agent. Parse the job opportunity from this email:\\n{{ $json.snippet }}\\n\\n1. Extract company, role, salary range, stack.\\n2. Generate tailored resume highlights.\\n3. Draft custom cover letter."
+      },
+      "id": "67a20f8a-2534-5414-8965-45b428f7f9fe",
+      "name": "Gemini Autonomous Career Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "name": "=Application Pack - {{ $json.company }}.txt"
+      },
+      "id": "7a21bb6e-89df-5982-aab3-b2b6f89d330d",
+      "name": "Store Tailored Pack in Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "JOB_TRACKER_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name"
+        }
+      },
+      "id": "3114072d-341e-5937-8a31-b2c0a2cf15b8",
+      "name": "Log in Application Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "me@example.com",
+        "subject": "🚀 Review Tailored Application: Ready for Approval",
+        "message": "={{ $json.output }}"
+      },
+      "id": "cbc51a1b-1913-5c24-a0f0-f3b80b63b835",
+      "name": "Send Approval Notification to Candidate",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Inbound Job Alert Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini Autonomous Career Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Autonomous Career Agent": {
+      "main": [
+        [
+          {
+            "node": "Store Tailored Pack in Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Tailored Pack in Drive": {
+      "main": [
+        [
+          {
+            "node": "Log in Application Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log in Application Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Notification to Candidate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "96b764c8-986f-5455-9373-9549f28fd6aa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-020",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}

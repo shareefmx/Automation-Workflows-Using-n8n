@@ -1,0 +1,145 @@
+{
+  "name": "AI Job Application Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-job-description",
+        "responseMode": "onReceived"
+      },
+      "id": "e4e97f0c-4207-534c-8706-a37729767efb",
+      "name": "JD Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "MASTER_RESUME_DOC_ID",
+          "mode": "id"
+        }
+      },
+      "id": "71ed9600-f1f7-56f2-bf9f-643975b91270",
+      "name": "Read Master Resume from Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following Job Description:\\n{{ $('JD Webhook Trigger').item.json.body.job_description }}\\n\\nAnd master background:\\n{{ $json.data }}\\n\\nGenerate: 1) Tailored Resume Bullets highlighting matching skills, 2) A persuasive cover letter addressed to the hiring team."
+      },
+      "id": "4f022917-2736-5d06-bba1-d05f8e84d853",
+      "name": "Gemini AI Tailor Prompt",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "name": "=Application - {{ $('JD Webhook Trigger').item.json.body.company }} - {{ $('JD Webhook Trigger').item.json.body.role }}.txt"
+      },
+      "id": "337024a4-4168-5324-925b-2a5af81d97f7",
+      "name": "Save Application to Google Docs",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "me@example.com",
+        "subject": "=Ready to Apply: {{ $('JD Webhook Trigger').item.json.body.company }} - {{ $('JD Webhook Trigger').item.json.body.role }}",
+        "message": "={{ $('Gemini AI Tailor Prompt').item.json.output }}"
+      },
+      "id": "562baabc-1df8-5a8c-b8e0-877f75e7ee3f",
+      "name": "Email Review Copy to Applicant",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1100,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "JD Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Master Resume from Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Master Resume from Drive": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Tailor Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Tailor Prompt": {
+      "main": [
+        [
+          {
+            "node": "Save Application to Google Docs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Application to Google Docs": {
+      "main": [
+        [
+          {
+            "node": "Email Review Copy to Applicant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "38cf35c3-2393-5b6a-bdf2-95651d187bc7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-002",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}

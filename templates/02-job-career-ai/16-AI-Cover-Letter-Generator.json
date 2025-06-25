@@ -1,0 +1,117 @@
+{
+  "name": "AI Cover Letter Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-cover-letter",
+        "responseMode": "lastNode"
+      },
+      "id": "1cd16824-07d7-548e-8f2e-7e7a3711cfe9",
+      "name": "Cover Letter Trigger Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a personalized 3-paragraph cover letter for the role of {{ $json.body.role }} at {{ $json.body.company }}.\\nKey candidate highlights:\\n{{ $json.body.experience_highlights }}\\nMake tone professional, confident and engaging."
+      },
+      "id": "c17822ff-cab3-577c-b278-f4d9490d30b2",
+      "name": "Gemini AI Writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "name": "=Cover Letter - {{ $('Cover Letter Trigger Webhook').item.json.body.company }} - {{ $('Cover Letter Trigger Webhook').item.json.body.role }}.doc"
+      },
+      "id": "d004c28d-e86f-5eec-844a-534cee3f4fdc",
+      "name": "Save to Google Drive Document",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"created\", \"cover_letter\": \"{{ $('Gemini AI Writer').item.json.output }}\", \"file_id\": \"{{ $json.id }}\"}"
+      },
+      "id": "36498fc3-e0d3-59d4-a4b5-ba67b70a880c",
+      "name": "Return Download Link",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cover Letter Trigger Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Writer": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Drive Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Google Drive Document": {
+      "main": [
+        [
+          {
+            "node": "Return Download Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1c07a7bb-9ad3-5ed3-925e-46a840a4db11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-016",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}

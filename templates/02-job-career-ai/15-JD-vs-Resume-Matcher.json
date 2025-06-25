@@ -1,0 +1,92 @@
+{
+  "name": "JD vs Resume Matcher",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "match-jd-resume",
+        "responseMode": "lastNode"
+      },
+      "id": "3cde796d-2298-5549-bd1a-b0c3d10b1681",
+      "name": "Match Request Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Compare Candidate Resume with Job Description:\\n\\nJob Description:\\n{{ $json.body.job_description }}\\n\\nResume:\\n{{ $json.body.resume_text }}\\n\\nOutput in JSON: { match_percentage: number, missing_skills: string[], strong_matches: string[], recommendations: string }"
+      },
+      "id": "fa088e7a-a2ca-5c53-9ce5-65784d5b8505",
+      "name": "Gemini Deep Match Evaluator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "={{ $json.output }}"
+      },
+      "id": "cfec888d-b045-5b38-ba76-d7286a60eafb",
+      "name": "Respond with Match Report",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Match Request Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini Deep Match Evaluator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Deep Match Evaluator": {
+      "main": [
+        [
+          {
+            "node": "Respond with Match Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b684d055-1e65-58bc-a04c-5f0ece4cede9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-015",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}

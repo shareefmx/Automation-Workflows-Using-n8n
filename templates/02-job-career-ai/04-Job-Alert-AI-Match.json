@@ -1,0 +1,140 @@
+{
+  "name": "Job Alert AI Match",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "from:(linkedin.com OR indeed.com) subject:(\"job alert\" OR \"recommended job\")"
+        }
+      },
+      "id": "636c67e4-9e51-56b4-a5c3-fa278129a015",
+      "name": "Job Alert Email Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Evaluate this job alert email body:\\n{{ $json.snippet }}\\n\\nCandidate Profile: Senior Automation Engineer & Python/Typescript Developer with n8n and AI workflow expertise.\\nProvide: 1) Score (0-100), 2) Recommendation (Apply / Skip), 3) Key matching keywords."
+      },
+      "id": "25be949d-1eed-57a5-a505-a0eb20fd96d6",
+      "name": "Gemini Relevance Matcher",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "ad5472c7-5331-576e-8e6f-998e6f8d33e5",
+      "name": "Filter High Score (>80)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "me@example.com",
+        "subject": "🔥 High Match Job Alert Detected!",
+        "message": "={{ $json.analysis }}"
+      },
+      "id": "b1992a74-f287-5be8-9dc6-d72239729a32",
+      "name": "Send Priority Notification",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Job Alert Email Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini Relevance Matcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Relevance Matcher": {
+      "main": [
+        [
+          {
+            "node": "Filter High Score (>80)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Score (>80)": {
+      "main": [
+        [
+          {
+            "node": "Send Priority Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6ee8c9ad-7da1-5aa7-b4dc-36b615509b78",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-004",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "name": "Auto Job Application Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:(Application OR Applied OR \"Thank you for applying\")"
+        }
+      },
+      "id": "f1361459-f8c0-57ef-b589-7c028884c956",
+      "name": "Gmail Application Sent Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const email = $input.item.json;\nconst subject = email.subject || '';\nconst from = email.from || '';\nconst date = email.date || new Date().toISOString();\nreturn { json: { company: from.split('<')[0].replace(/\"/g, '').trim(), subject, date, snippet: email.snippet } };"
+      },
+      "id": "c001c1c2-31b5-53be-92be-e74d59a90bf7",
+      "name": "Extract Job Metadata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "JOB_TRACKER_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Applications",
+          "mode": "name"
+        }
+      },
+      "id": "65401832-93bc-5044-a121-df739e799058",
+      "name": "Log in Google Sheets Tracker",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "NOTION_DB_ID"
+      },
+      "id": "45f4eb52-47d7-55a5-ba9a-f0c82c25da9e",
+      "name": "Create Notion Application Card",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Application Sent Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract Job Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Job Metadata": {
+      "main": [
+        [
+          {
+            "node": "Log in Google Sheets Tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log in Google Sheets Tracker": {
+      "main": [
+        [
+          {
+            "node": "Create Notion Application Card",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b54276f2-46ca-5d2e-9a56-649b7d36bd4c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-003",
+  "tags": [
+    {
+      "name": "02 Job Career Ai",
+      "id": "tag-02-job-career-ai"
+    }
+  ]
+}
