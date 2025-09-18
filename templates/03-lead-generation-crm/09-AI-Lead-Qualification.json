@@ -1,0 +1,148 @@
+{
+  "name": "AI Lead Qualification",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "LEAD_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        }
+      },
+      "id": "e2097eb1-46de-5d05-9cf1-3aabad4f41ff",
+      "name": "Poll Unqualified Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.Score }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "0da547f5-6dac-5aba-98ba-a55d7127884d",
+      "name": "Filter Status Pending",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze lead details:\\nCompany: {{ $json.company }}\\nBudget: {{ $json.budget }}\\nMessage: {{ $json.message }}\\n\\nCategorize into: [Hot, Warm, Cold] and assign score from 0-100 with 1 sentence rationale."
+      },
+      "id": "89c71cc9-81dd-55eb-a8db-e7c10a3b822e",
+      "name": "Gemini AI Lead Scorer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "LEAD_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        }
+      },
+      "id": "6e707c70-ca55-5f60-a2a0-167e62d6a8c1",
+      "name": "Update Lead Tier in Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Poll Unqualified Leads": {
+      "main": [
+        [
+          {
+            "node": "Filter Status Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Status Pending": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Lead Scorer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Lead Scorer": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Tier in Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dc45fc47-6425-518a-9c61-0d59630dd927",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-009",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

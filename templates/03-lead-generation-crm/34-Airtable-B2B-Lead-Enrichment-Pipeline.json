@@ -1,0 +1,86 @@
+{
+  "name": "Airtable B2B Lead Enrichment Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "table": "Leads"
+      },
+      "id": "fd89ec4f-22fc-5d7e-b8c2-ef194175da4d",
+      "name": "Airtable New Lead Trigger",
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://company.clearbit.com/v2/companies/find?domain={{ $json.fields.Domain }}"
+      },
+      "id": "102f810b-40e1-5cdd-842a-65b809304f2e",
+      "name": "Enrich Company via Clearbit API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "Leads"
+      },
+      "id": "3d7b97e0-e12b-500f-94ea-ccff53347c38",
+      "name": "Update Airtable Enriched Data",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Airtable New Lead Trigger": {
+      "main": [
+        [
+          {
+            "node": "Enrich Company via Clearbit API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Company via Clearbit API": {
+      "main": [
+        [
+          {
+            "node": "Update Airtable Enriched Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fe70bf3c-8cef-523d-8c0d-8e420d22c1d7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-034",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

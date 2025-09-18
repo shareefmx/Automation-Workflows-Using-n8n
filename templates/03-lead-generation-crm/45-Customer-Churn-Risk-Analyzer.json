@@ -1,0 +1,129 @@
+{
+  "name": "Customer Churn Risk Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "a496847b-e4fa-5bfd-a8b4-9a7c63c5d2c9",
+      "name": "Weekly Usage Ingestion",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "CUSTOMER_ACTIVITY_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Accounts",
+          "mode": "name"
+        }
+      },
+      "id": "72681d87-5be4-5d82-8561-fa7fa0b5454e",
+      "name": "Read Customer Activity",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze account activity for {{ $json.company }}: logins decreased by {{ $json.login_drop }}%, opened {{ $json.support_tickets }} support tickets. Predict churn risk (High/Medium/Low) and recommend retention action."
+      },
+      "id": "d3563eb2-03dc-53d9-8ae5-30dbce89dec2",
+      "name": "Gemini Churn Risk Predictor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#customer-retention",
+        "text": "⚠️ *High Churn Risk Detected:*\\n{{ $json.output }}"
+      },
+      "id": "cd13dd3b-1292-5a33-b0a8-03e0d4ff5aeb",
+      "name": "Alert CS Team on Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Usage Ingestion": {
+      "main": [
+        [
+          {
+            "node": "Read Customer Activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Customer Activity": {
+      "main": [
+        [
+          {
+            "node": "Gemini Churn Risk Predictor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Churn Risk Predictor": {
+      "main": [
+        [
+          {
+            "node": "Alert CS Team on Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "30127957-a942-5152-891e-73b3d016542c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-045",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

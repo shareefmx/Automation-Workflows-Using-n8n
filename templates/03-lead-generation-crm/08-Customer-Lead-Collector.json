@@ -1,0 +1,98 @@
+{
+  "name": "Customer Lead Collector",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "customer-lead-capture",
+        "responseMode": "onReceived"
+      },
+      "id": "d2fe63b2-dbcc-5b75-8cd6-8f420c46bcc0",
+      "name": "Lead Ingestion Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const lead = $input.item.json.body;\nreturn {\n  json: {\n    first_name: lead.first_name ? lead.first_name.trim() : 'Valued',\n    last_name: lead.last_name ? lead.last_name.trim() : 'Customer',\n    email: lead.email ? lead.email.toLowerCase().trim() : '',\n    company: lead.company ? lead.company.trim() : 'N/A',\n    source: lead.source || 'Website',\n    captured_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "f82fb42a-c20d-5992-8aec-7f70dea2e5b9",
+      "name": "Data Sanitization Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "LEAD_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        }
+      },
+      "id": "961490f9-9b67-5931-975f-ef64a438529f",
+      "name": "Append to Google Sheets CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lead Ingestion Webhook": {
+      "main": [
+        [
+          {
+            "node": "Data Sanitization Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Sanitization Code": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b518cd26-a8ee-5ba4-9d6d-86f060c5d11a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-008",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

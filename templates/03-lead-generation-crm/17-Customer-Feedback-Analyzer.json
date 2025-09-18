@@ -1,0 +1,106 @@
+{
+  "name": "Customer Feedback Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "FEEDBACK_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Responses",
+          "mode": "name"
+        }
+      },
+      "id": "5ccf860e-41a4-55e5-8799-9f43eb1275e4",
+      "name": "Fetch New Feedback Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze feedback text: '{{ $json.FeedbackText }}'.\\nDetermine: 1) Sentiment: [Positive, Neutral, Negative], 2) Primary Category: [Bug, UX, Feature Request, Pricing, Praise], 3) Executive 1-line summary."
+      },
+      "id": "c5ddd604-e4af-5051-85b3-38cb87ba8652",
+      "name": "Gemini Sentiment Classifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "FEEDBACK_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Responses",
+          "mode": "name"
+        }
+      },
+      "id": "23d1bb77-b4a4-53c7-9fac-1617b4dba924",
+      "name": "Update Analyzed Sentiment",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fetch New Feedback Rows": {
+      "main": [
+        [
+          {
+            "node": "Gemini Sentiment Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Sentiment Classifier": {
+      "main": [
+        [
+          {
+            "node": "Update Analyzed Sentiment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2555ad20-b349-5477-8b64-b1805a43bcfd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-017",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}
