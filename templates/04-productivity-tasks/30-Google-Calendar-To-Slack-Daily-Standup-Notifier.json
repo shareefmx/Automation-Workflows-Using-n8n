@@ -1,0 +1,123 @@
+{
+  "name": "Google Calendar to Slack Daily Standup Notifier",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "1e2398b5-6b72-51f0-b738-43ddd180c473",
+      "name": "9 AM Weekday Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {
+          "timeMin": "={{ $now.startOf('day').toISO() }}",
+          "timeMax": "={{ $now.endOf('day').toISO() }}"
+        }
+      },
+      "id": "3f69b6b4-c2ff-5901-89d2-4a2b98157a0b",
+      "name": "Retrieve Daily Calendar Events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst eventLines = items.map(i => `• *${i.json.summary}* (${i.json.start.dateTime ? new Date(i.json.start.dateTime).toLocaleTimeString() : 'All day'})`).join('\\n');\nreturn [{ json: { text: `☀️ *Good Morning Team! Here is today's schedule:*\\n\\n${eventLines}` } }];"
+      },
+      "id": "58fbd952-3dc7-5bd0-af96-6be292a49266",
+      "name": "Format Slack Standup Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#daily-standup",
+        "text": "={{ $json.text }}"
+      },
+      "id": "5ad5cbe7-cef9-5363-8165-aa69e9987f6f",
+      "name": "Broadcast to #standup Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "9 AM Weekday Trigger": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Daily Calendar Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Daily Calendar Events": {
+      "main": [
+        [
+          {
+            "node": "Format Slack Standup Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Slack Standup Message": {
+      "main": [
+        [
+          {
+            "node": "Broadcast to #standup Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec8ac858-214d-5bbc-b3a0-7715b4a0fba9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-030",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

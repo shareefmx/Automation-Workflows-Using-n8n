@@ -1,0 +1,129 @@
+{
+  "name": "Meeting Reminder Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "cab1bc1c-587a-5209-ba06-0c35cb6f8f84",
+      "name": "Cron Every 15 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "id"
+        },
+        "options": {
+          "timeMin": "={{ $now.toISO() }}",
+          "timeMax": "={{ $now.plus({ minutes: 30 }).toISO() }}"
+        }
+      },
+      "id": "2a8c1aab-e136-5571-a9c0-f5aecb1d88d7",
+      "name": "Fetch Upcoming Events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "@team_alerts",
+        "text": "=📅 Reminder: *{{ $json.summary }}* starts in 15 minutes!\\n🔗 Link: {{ $json.hangoutLink || 'In-person / Calendar link' }}"
+      },
+      "id": "7f3b3172-1bda-530e-bf1a-79e42e1d6e6f",
+      "name": "Send Telegram Reminder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#general",
+        "text": "=📅 Reminder: *{{ $json.summary }}* is starting shortly!"
+      },
+      "id": "2af9a059-1121-527d-bb15-24fc8c3ebe9a",
+      "name": "Post to Slack Channel",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron Every 15 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Fetch Upcoming Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Upcoming Events": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Reminder": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3715aeb2-ed51-56e2-beb8-09f4d5a5471f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-006",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

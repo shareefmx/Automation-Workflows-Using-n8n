@@ -1,0 +1,119 @@
+{
+  "name": "AI Audio Meeting Notes & Action Item Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "e0538b98-a495-56fb-be52-82c9f666f685",
+      "name": "Watch Meeting Recordings Folder",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}"
+      },
+      "id": "f6ed24a8-b82c-552b-af18-43f3f0901a65",
+      "name": "Download Audio Recording",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract meeting summary, decisions reached, and specific action items with assignees from this meeting recording transcript."
+      },
+      "id": "7549ac17-8201-5c38-87e6-eb0e8ec0f951",
+      "name": "Gemini Meeting Analyzer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "NOTION_MEETINGS_DB"
+      },
+      "id": "6dad9871-74a2-5747-b77f-dcde380da3ac",
+      "name": "Create Meeting Notes in Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Watch Meeting Recordings Folder": {
+      "main": [
+        [
+          {
+            "node": "Download Audio Recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio Recording": {
+      "main": [
+        [
+          {
+            "node": "Gemini Meeting Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Meeting Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Create Meeting Notes in Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cbd4d150-5359-5667-8826-5ec069257e7d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-035",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

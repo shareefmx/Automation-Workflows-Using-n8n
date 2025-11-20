@@ -1,0 +1,133 @@
+{
+  "name": "Slack Task Creator",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "reaction_added"
+        ]
+      },
+      "id": "04af373a-9bd3-560f-b077-e11072e8fd0b",
+      "name": "Slack Reaction Added Trigger",
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.reaction }}",
+              "rightValue": "white_check_mark",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "1b7957b0-4389-51dc-820c-aaaf1b8e5ce9",
+      "name": "Filter Bookmark Emoji",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getMessage",
+        "channel": "={{ $json.item.channel }}",
+        "timestamp": "={{ $json.item.ts }}"
+      },
+      "id": "d868ef3c-439d-55cb-9631-8e6afdff9cd5",
+      "name": "Fetch Original Slack Message",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "TASKS_DATABASE_ID"
+      },
+      "id": "9e349cc2-9350-5aba-ba77-88feadbd7e01",
+      "name": "Create Task in Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Slack Reaction Added Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter Bookmark Emoji",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Bookmark Emoji": {
+      "main": [
+        [
+          {
+            "node": "Fetch Original Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Original Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Create Task in Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2dd6732-f171-527a-aea5-f6019377512b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-018",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

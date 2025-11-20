@@ -1,0 +1,107 @@
+{
+  "name": "GitHub Issue to Notion Task Synchronizer",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "issues"
+        ]
+      },
+      "id": "33916722-48c2-52f7-9f8d-7eaa42804aed",
+      "name": "GitHub Issue Created Webhook",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "opened",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "120977c6-8963-5011-b358-4153a46e4d01",
+      "name": "Filter Action Opened",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "NOTION_DEV_BACKLOG"
+      },
+      "id": "45b4661a-9bd2-50e1-af5c-352c80cb7568",
+      "name": "Create Notion Engineering Task",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GitHub Issue Created Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter Action Opened",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Action Opened": {
+      "main": [
+        [
+          {
+            "node": "Create Notion Engineering Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6328c8bb-c89c-5354-814f-c3f6c5751423",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-027",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}
