@@ -1,0 +1,90 @@
+{
+  "name": "Telegram Multi-Language Translation Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "3c070646-1d0a-556f-9a2a-8b6a485b3b9b",
+      "name": "Telegram Inbound Text",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Translate the following message into English, Spanish, German, and Arabic with language tags:\\n{{ $json.message.text }}"
+      },
+      "id": "1ea971a6-3408-5ed8-a056-44db3436935f",
+      "name": "Gemini Multilingual Translator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Inbound Text').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}"
+      },
+      "id": "6483e28e-a8b0-5e0a-867a-c426cb65032a",
+      "name": "Send Translated Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Inbound Text": {
+      "main": [
+        [
+          {
+            "node": "Gemini Multilingual Translator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Multilingual Translator": {
+      "main": [
+        [
+          {
+            "node": "Send Translated Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e3ab5970-fbb2-5ea1-a6a3-4631729b9616",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-038",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

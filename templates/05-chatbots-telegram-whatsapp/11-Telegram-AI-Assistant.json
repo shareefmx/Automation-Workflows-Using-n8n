@@ -1,0 +1,90 @@
+{
+  "name": "Telegram AI Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "16bde395-9c43-549f-8236-a77dd1df1529",
+      "name": "Telegram Inbound Message",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User Message from Telegram: {{ $json.message.text }}\\n\\nRespond concisely and helpfully in markdown format."
+      },
+      "id": "19574f13-aa78-5231-a2d9-0bcc2f9e9117",
+      "name": "Gemini Conversational Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Inbound Message').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}"
+      },
+      "id": "56015ade-1132-5d2a-9e28-e98e83680931",
+      "name": "Send Telegram Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Inbound Message": {
+      "main": [
+        [
+          {
+            "node": "Gemini Conversational Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Conversational Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d370fb91-b9d8-55f3-ab93-04cd86171aa3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-011",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

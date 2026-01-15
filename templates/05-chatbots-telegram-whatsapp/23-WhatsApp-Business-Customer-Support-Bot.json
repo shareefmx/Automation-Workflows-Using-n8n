@@ -1,0 +1,88 @@
+{
+  "name": "WhatsApp Business Customer Support Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-webhook"
+      },
+      "id": "e7ccc50c-2b2a-593b-95a5-aaff50932d71",
+      "name": "WhatsApp Inbound Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Provide helpful customer support for query: {{ $json.body.entry[0].changes[0].value.messages[0].text.body }}"
+      },
+      "id": "9567d467-1e1a-593e-85c5-c16dc4a3433b",
+      "name": "Gemini Multilingual Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v18.0/PHONE_NUMBER_ID/messages"
+      },
+      "id": "27c4ebd9-b37c-5166-b2af-64398dceb531",
+      "name": "Dispatch WhatsApp Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Inbound Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini Multilingual Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Multilingual Agent": {
+      "main": [
+        [
+          {
+            "node": "Dispatch WhatsApp Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "697beb28-b3d7-593a-b367-96dac3401a11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-023",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "name": "Discord Community Welcome & Role Assigner",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "discord-member-joined"
+      },
+      "id": "247f7ea3-6f0d-55e6-bb48-74fae02e23d8",
+      "name": "Discord Member Join Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const user = $input.item.json.body.user;\nreturn { json: { content: `Welcome <@${user.id}> to our developer hub! 🚀 Read #rules to get started.` } };"
+      },
+      "id": "3b4606eb-d114-5b62-baa3-06a6780fe48b",
+      "name": "Format Welcome DM",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "channelId": "WELCOME_CHANNEL_ID",
+        "content": "={{ $json.content }}"
+      },
+      "id": "3a21d06e-951f-594d-acdf-11e581c9db24",
+      "name": "Send Discord Channel Welcome",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Discord Member Join Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Welcome DM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Welcome DM": {
+      "main": [
+        [
+          {
+            "node": "Send Discord Channel Welcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "37b0d41b-a0b6-50bc-8ffb-6c559782aa20",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-025",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "name": "Zendesk Critical Ticket Escalator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "zendesk-ticket-alert"
+      },
+      "id": "cf1d849c-0fbc-5f0d-8f14-eda60feee916",
+      "name": "Zendesk Ticket Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.priority }}",
+              "rightValue": "urgent",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "078e29a9-87c4-596d-921b-b35d267c0857",
+      "name": "Check Priority Urgent",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#incident-room",
+        "text": "🚨 URGENT ZENDESK TICKET: {{ $json.body.subject }} from {{ $json.body.requester_email }}"
+      },
+      "id": "cd1c0219-0202-55db-8cc3-fae70032851d",
+      "name": "Post to On-Call Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Zendesk Ticket Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Priority Urgent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Priority Urgent": {
+      "main": [
+        [
+          {
+            "node": "Post to On-Call Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5fb3c8db-ff9f-549f-83d1-64a6eb7aa6f6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-039",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

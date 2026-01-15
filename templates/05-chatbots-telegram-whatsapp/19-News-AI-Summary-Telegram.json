@@ -1,0 +1,119 @@
+{
+  "name": "News AI Summary to Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "5b667a0a-c1cd-516e-b0f1-9193e8dbbb2e",
+      "name": "Morning 8 AM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss"
+      },
+      "id": "08f6eaaf-b755-5a6b-9b33-d6fa35741359",
+      "name": "Fetch Tech RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize these top news headlines into 5 bullet points with key takeaways and emojis:\\n{{ $json.title }} - {{ $json.link }}"
+      },
+      "id": "d8e1d2c7-b876-5a53-a239-f6a4caa08107",
+      "name": "Gemini AI News Digest",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "@tech_digest_daily",
+        "text": "={{ $json.output }}"
+      },
+      "id": "ac56650c-de5b-5904-8ac1-29fd5daa2b9a",
+      "name": "Broadcast to Telegram Channel",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Morning 8 AM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch Tech RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Tech RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI News Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI News Digest": {
+      "main": [
+        [
+          {
+            "node": "Broadcast to Telegram Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0a4db0dd-9fc2-5ddd-b7df-3e83f491fea6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-019",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}
