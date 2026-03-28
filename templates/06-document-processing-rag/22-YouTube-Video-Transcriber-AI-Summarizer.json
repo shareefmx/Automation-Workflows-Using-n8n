@@ -1,0 +1,113 @@
+{
+  "name": "YouTube Video Transcriber & AI Summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "summarize-youtube"
+      },
+      "id": "567cfca8-f40d-5651-acb8-b052283b5f29",
+      "name": "Webhook Video URL Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.kome.ai/api/tools/youtube-transcripts?video_id={{ $json.body.video_id }}"
+      },
+      "id": "fd0b4e3d-c27e-50da-b34a-f9d59a18126e",
+      "name": "Fetch Video Captions API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize this YouTube transcript into executive overview, key concepts, and actionable insights with timestamps: {{ $json.transcript }}"
+      },
+      "id": "84fac125-c18c-552e-8bb4-68efdf99abea",
+      "name": "Gemini Comprehensive Summarizer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "NOTION_RESEARCH_DB"
+      },
+      "id": "cff51c74-c6ff-5182-bcaf-c4bc5c372bb2",
+      "name": "Save Page in Notion Library",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Video URL Input": {
+      "main": [
+        [
+          {
+            "node": "Fetch Video Captions API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Video Captions API": {
+      "main": [
+        [
+          {
+            "node": "Gemini Comprehensive Summarizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Comprehensive Summarizer": {
+      "main": [
+        [
+          {
+            "node": "Save Page in Notion Library",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f61d6502-8572-5edc-a7d3-cab304afdff8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-022",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

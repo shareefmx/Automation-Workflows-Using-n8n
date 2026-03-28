@@ -1,0 +1,119 @@
+{
+  "name": "Automated PDF Invoice Data Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "2ba5d2d1-5f53-519e-b9c9-cfabc326fc74",
+      "name": "Invoices Folder File Watcher",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": "={{ $json.id }}"
+      },
+      "id": "383e2127-d93a-59e0-819f-f258d3054d1b",
+      "name": "Download Invoice File",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract JSON data from this invoice: { vendor: string, invoice_number: string, date: string, subtotal: number, tax: number, total: number, items: array }"
+      },
+      "id": "4f2c6f90-f350-5ec7-b1f1-12dc31d33cbd",
+      "name": "Gemini Vision Invoice Extraction",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "base": "ACCOUNTING_BASE",
+        "table": "Invoices"
+      },
+      "id": "6367c312-49f6-5d9a-9dce-e554a692d94d",
+      "name": "Upsert Airtable Accounting Ledger",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Invoices Folder File Watcher": {
+      "main": [
+        [
+          {
+            "node": "Download Invoice File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Invoice File": {
+      "main": [
+        [
+          {
+            "node": "Gemini Vision Invoice Extraction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Vision Invoice Extraction": {
+      "main": [
+        [
+          {
+            "node": "Upsert Airtable Accounting Ledger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "10def182-eb5a-5ef1-b6fb-f20acbb14835",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-026",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

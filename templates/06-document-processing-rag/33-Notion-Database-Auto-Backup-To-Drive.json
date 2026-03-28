@@ -1,0 +1,120 @@
+{
+  "name": "Notion Database Auto-Backup to Drive",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "75c5eba6-8c53-5e1e-8665-f535e9a53a2d",
+      "name": "Weekly Sunday Midnight Cron",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "NOTION_KNOWLEDGE_DB"
+      },
+      "id": "3adc0da5-14ae-543f-88f9-de1cb117762b",
+      "name": "Query Entire Notion Database",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "return [{ json: { filename: `notion_backup_${new Date().toISOString().split('T')[0]}.json`, data: JSON.stringify($input.all()) } }];"
+      },
+      "id": "68867a3b-940f-5c94-bf50-a084df1bf5c4",
+      "name": "Serialize to JSON Archive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "name": "={{ $json.filename }}"
+      },
+      "id": "5c5ce258-8acd-516e-9f2b-41eb00f4b671",
+      "name": "Upload Backup to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Sunday Midnight Cron": {
+      "main": [
+        [
+          {
+            "node": "Query Entire Notion Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Entire Notion Database": {
+      "main": [
+        [
+          {
+            "node": "Serialize to JSON Archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serialize to JSON Archive": {
+      "main": [
+        [
+          {
+            "node": "Upload Backup to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a7103011-6cbb-514f-8b71-882f32e86b04",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-033",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

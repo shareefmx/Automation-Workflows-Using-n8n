@@ -1,0 +1,94 @@
+{
+  "name": "Google Drive File Organizer",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        }
+      },
+      "id": "f467f2f3-ac4a-51f0-9f68-5a80d5fa9099",
+      "name": "Drive New File Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Given file name: '{{ $json.name }}' and mimeType: '{{ $json.mimeType }}'.\\nClassify into one folder ID:\\n- Invoices: FOLDER_ID_INVOICES\\n- Contracts: FOLDER_ID_CONTRACTS\\n- Resumes: FOLDER_ID_RESUMES\\n- General Media: FOLDER_ID_MEDIA\\nReturn ONLY the chosen target folder ID."
+      },
+      "id": "95541297-2bd0-5b6e-9689-f162058adb0b",
+      "name": "Gemini File Category Classifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": "={{ $('Drive New File Trigger').item.json.id }}",
+        "folderId": "={{ $json.output.trim() }}"
+      },
+      "id": "d58d7bd6-2bd4-5674-805c-722e423e47a0",
+      "name": "Move File to Target Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Drive New File Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini File Category Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini File Category Classifier": {
+      "main": [
+        [
+          {
+            "node": "Move File to Target Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "43d76fd0-95a3-5372-aabd-1a2de4fa104f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-013",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

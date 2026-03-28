@@ -1,0 +1,123 @@
+{
+  "name": "Expense Receipt Scanner & Categorizer",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "a3507701-3522-5ad1-b662-a7279ab6b7a3",
+      "name": "Telegram Photo Receipt",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getFile",
+        "fileId": "={{ $json.message.photo.slice(-1)[0].file_id }}"
+      },
+      "id": "4d21bc21-f287-51b7-8a8f-708bf534b5d2",
+      "name": "Download Photo File",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract receipt details: { merchant: string, date: string, category: [Meals, Travel, Software, Office], amount: number, currency: string }"
+      },
+      "id": "295af374-5b42-5c61-a2ee-23d688060a66",
+      "name": "Gemini Vision Receipt OCR",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "EXPENSES_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Receipts",
+          "mode": "name"
+        }
+      },
+      "id": "f0f7aa0d-887d-5225-82f4-44e94e18e1e0",
+      "name": "Append to Expenses Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Photo Receipt": {
+      "main": [
+        [
+          {
+            "node": "Download Photo File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo File": {
+      "main": [
+        [
+          {
+            "node": "Gemini Vision Receipt OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Vision Receipt OCR": {
+      "main": [
+        [
+          {
+            "node": "Append to Expenses Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "95e54193-0d5a-5fd9-a5dc-ea3118ccfae9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-041",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}
