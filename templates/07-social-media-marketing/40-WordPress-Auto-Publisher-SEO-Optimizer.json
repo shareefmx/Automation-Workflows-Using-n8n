@@ -1,0 +1,98 @@
+{
+  "name": "WordPress Auto-Publisher & SEO Optimizer",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "WP_TOPICS_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Drafts",
+          "mode": "name"
+        }
+      },
+      "id": "dc42bf8b-874c-59ac-9deb-1db96c7ee15d",
+      "name": "New Topic in Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write an in-depth 1500-word blog post on '{{ $json.Topic }}' including HTML headings (h2, h3), meta title, meta description, and tags."
+      },
+      "id": "b6959705-ecda-5acc-ad8b-24d700b47b2a",
+      "name": "Gemini Article & SEO Meta Writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "title": "={{ $json.Topic }}",
+        "content": "={{ $json.output }}"
+      },
+      "id": "f869e3e7-b256-5622-a468-01a0e7561202",
+      "name": "Create WordPress Draft Post",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Topic in Sheets": {
+      "main": [
+        [
+          {
+            "node": "Gemini Article & SEO Meta Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Article & SEO Meta Writer": {
+      "main": [
+        [
+          {
+            "node": "Create WordPress Draft Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6495580b-daee-5718-9b72-8b538cbabc7f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-040",
+  "tags": [
+    {
+      "name": "07 Social Media Marketing",
+      "id": "tag-07-social-media-marketing"
+    }
+  ]
+}

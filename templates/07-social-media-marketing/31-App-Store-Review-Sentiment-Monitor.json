@@ -1,0 +1,119 @@
+{
+  "name": "App Store Review Sentiment Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "c3d8809e-9b25-5882-bc20-49b4418540c7",
+      "name": "Check App Reviews RSS Hourly",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://itunes.apple.com/us/rss/customerreviews/id=YOUR_APP_ID/xml"
+      },
+      "id": "9dc23562-3541-50eb-a7b9-9da7dcbd496c",
+      "name": "Fetch App Store RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review: {{ $json.content }}. Identify sentiment, rating, and whether it mentions a critical bug or crash."
+      },
+      "id": "a017c573-9903-570f-a8a8-428bbd355e61",
+      "name": "Gemini Sentiment Analysis",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#product-feedback",
+        "text": "⚠️ *New Critical App Review:*\\n{{ $json.output }}"
+      },
+      "id": "cae18625-f889-5535-a8a4-ad2a87aaae37",
+      "name": "Alert Slack on Negative / Bug",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Check App Reviews RSS Hourly": {
+      "main": [
+        [
+          {
+            "node": "Fetch App Store RSS Feed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch App Store RSS Feed": {
+      "main": [
+        [
+          {
+            "node": "Gemini Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Alert Slack on Negative / Bug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e5216b39-a884-50db-8d18-00ce4c8d1e81",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-031",
+  "tags": [
+    {
+      "name": "07 Social Media Marketing",
+      "id": "tag-07-social-media-marketing"
+    }
+  ]
+}

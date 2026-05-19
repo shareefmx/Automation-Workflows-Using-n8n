@@ -1,0 +1,97 @@
+{
+  "name": "Creative Asset Prompt & Cloudinary Uploader",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-creative-assets"
+      },
+      "id": "844a52d7-f361-5105-87cd-7403400d941d",
+      "name": "Marketing Campaign Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Transform this marketing angle: '{{ $json.body.campaign_concept }}' into 3 cinematic photorealistic Midjourney prompts with lighting, camera angles, and color palettes."
+      },
+      "id": "f18fa79e-b3dc-5f08-ad48-0bfccb467f78",
+      "name": "Gemini Image Prompt Architect",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "CREATIVE_ASSETS_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prompts",
+          "mode": "name"
+        }
+      },
+      "id": "a27651f4-b04a-5f23-b22a-356f0fdc97be",
+      "name": "Save to Assets Tracker",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Marketing Campaign Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini Image Prompt Architect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Image Prompt Architect": {
+      "main": [
+        [
+          {
+            "node": "Save to Assets Tracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9014d019-9538-5462-a876-95944dc04527",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-053",
+  "tags": [
+    {
+      "name": "07 Social Media Marketing",
+      "id": "tag-07-social-media-marketing"
+    }
+  ]
+}
