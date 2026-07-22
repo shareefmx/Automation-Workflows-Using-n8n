@@ -1,0 +1,89 @@
+{
+  "name": "Supabase Database Change Webhook to Slack",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "supabase-db-changes"
+      },
+      "id": "ebb59319-9330-52c0-b50f-61b35fee045e",
+      "name": "Supabase Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const change = $input.item.json.body;\nreturn { json: { text: `🔔 *Supabase Table [${change.table}]* event: *${change.type}*\\nRecord ID: ${change.record ? change.record.id : 'N/A'}` } };"
+      },
+      "id": "2b67a189-d09b-58e0-909b-a6e1cf8e1a3d",
+      "name": "Format Change Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#db-activity",
+        "text": "={{ $json.text }}"
+      },
+      "id": "a05dedcd-41d9-53f9-8e10-541cdcf340b7",
+      "name": "Post to Engineering Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Supabase Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Format Change Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Change Event": {
+      "main": [
+        [
+          {
+            "node": "Post to Engineering Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "afe34c38-bb61-542e-b78f-9bc4f03be0bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-043",
+  "tags": [
+    {
+      "name": "08 Devops System Monitoring",
+      "id": "tag-08-devops-system-monitoring"
+    }
+  ]
+}

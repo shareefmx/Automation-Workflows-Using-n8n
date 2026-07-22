@@ -1,0 +1,106 @@
+{
+  "name": "Docker Container Health & Restart Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "docker-events"
+      },
+      "id": "0fac2826-498c-5775-afbe-53f43e4bc5b1",
+      "name": "Docker Event Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.Action }}",
+              "rightValue": "die",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "94c65667-a732-5932-bd2b-b557d1fb58c8",
+      "name": "Filter Die or OOM Events",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "@ops_alerts",
+        "text": "🔥 DOCKER CONTAINER CRASHED: {{ $json.body.Actor.Attributes.name }} (ExitCode: {{ $json.body.Actor.Attributes.exitCode }})"
+      },
+      "id": "c9b5b9dd-93b6-5a77-bd25-098c580304a3",
+      "name": "Alert On-Call via Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Docker Event Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter Die or OOM Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Die or OOM Events": {
+      "main": [
+        [
+          {
+            "node": "Alert On-Call via Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "24bd533a-7b83-5057-be95-251468cf8e71",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-050",
+  "tags": [
+    {
+      "name": "08 Devops System Monitoring",
+      "id": "tag-08-devops-system-monitoring"
+    }
+  ]
+}

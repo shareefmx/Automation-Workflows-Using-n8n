@@ -1,0 +1,103 @@
+{
+  "name": "PostgreSQL to Google Sheets Automated Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "bad1496f-f9e1-5a15-961c-acc4bd20cf19",
+      "name": "Daily 1 AM Sync Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT date_trunc('day', created_at) as date, count(*) as signups, sum(amount) as revenue FROM orders WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1 DESC;"
+      },
+      "id": "027a40c0-3101-5c04-adfb-6dd7df0f481e",
+      "name": "Query Postgres Production DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "METRICS_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "RevenueSync",
+          "mode": "name"
+        }
+      },
+      "id": "0a1974ad-2839-50a0-b63f-cda091f8dfef",
+      "name": "Sync to Sheets Dashboard",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 1 AM Sync Trigger": {
+      "main": [
+        [
+          {
+            "node": "Query Postgres Production DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Postgres Production DB": {
+      "main": [
+        [
+          {
+            "node": "Sync to Sheets Dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9b6c7dd6-1ac7-5b95-86e8-8d7aa08368e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-024",
+  "tags": [
+    {
+      "name": "08 Devops System Monitoring",
+      "id": "tag-08-devops-system-monitoring"
+    }
+  ]
+}
