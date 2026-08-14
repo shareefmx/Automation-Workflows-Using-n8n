@@ -1,0 +1,99 @@
+{
+  "name": "Google Forms Quiz Auto-Grader & Certificate Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "QUIZ_RESPONSES_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Submissions",
+          "mode": "name"
+        }
+      },
+      "id": "b6aa4316-81ca-5619-a95c-7c188113b5f6",
+      "name": "Quiz Submission Trigger",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sub = $input.item.json;\nconst score = (sub.q1 === 'A' ? 25 : 0) + (sub.q2 === 'C' ? 25 : 0) + (sub.q3 === 'B' ? 25 : 0) + (sub.q4 === 'D' ? 25 : 0);\nreturn { json: { ...sub, score, passed: score >= 75 } };"
+      },
+      "id": "05186dfe-4aca-5c1f-b2f3-d4bb00252fa1",
+      "name": "Calculate Score Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.email }}",
+        "subject": "🎓 Congratulations! Your Certificate of Completion",
+        "message": "=Hi {{ $json.name }},\\n\\nYou scored {{ $json.score }}%! You passed the automation proficiency test."
+      },
+      "id": "b158f924-291f-529a-9b3d-b2f23c033d35",
+      "name": "Send Completion Certificate Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Quiz Submission Trigger": {
+      "main": [
+        [
+          {
+            "node": "Calculate Score Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Score Code": {
+      "main": [
+        [
+          {
+            "node": "Send Completion Certificate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6aac2d15-efcd-5679-be7b-67628608ae13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-044",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}

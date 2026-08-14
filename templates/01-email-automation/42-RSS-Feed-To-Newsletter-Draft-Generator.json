@@ -1,0 +1,119 @@
+{
+  "name": "RSS Feed to Newsletter Draft Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "5e895469-d562-5fb9-80ac-57b485891d49",
+      "name": "Weekly Friday Cron",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/"
+      },
+      "id": "a69160cc-47c4-534c-b36e-336b9090a6b9",
+      "name": "Read Curated RSS Feeds",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Compose this week's 5-minute tech dispatch newsletter from top articles:\\n{{ $json.title }} - {{ $json.snippet }}"
+      },
+      "id": "0d7e885e-6b4a-5523-b81b-bbbee8b52cd3",
+      "name": "Gemini Newsletter Curator",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createDraft",
+        "subject": "📰 This Week in Automation - Curated Digest",
+        "message": "={{ $json.output }}"
+      },
+      "id": "87f2d7e9-a429-5434-aa88-43c94a6a2cd6",
+      "name": "Save Gmail Newsletter Draft",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Friday Cron": {
+      "main": [
+        [
+          {
+            "node": "Read Curated RSS Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Curated RSS Feeds": {
+      "main": [
+        [
+          {
+            "node": "Gemini Newsletter Curator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Newsletter Curator": {
+      "main": [
+        [
+          {
+            "node": "Save Gmail Newsletter Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b045e437-2b04-5b00-b6f5-d9f6d74d7c75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-042",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

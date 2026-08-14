@@ -1,0 +1,119 @@
+{
+  "name": "Real Estate Listing Scraper & Lead Matcher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "42e0683e-946b-5c6b-a52a-6ffed22e59a7",
+      "name": "Every 2 Hours Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.propertydata.example/feed"
+      },
+      "id": "c1537d29-07dc-5f2f-a183-9069a9514dbc",
+      "name": "Fetch New Listings API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Compare new listing (Price: ${{ $json.price }}, Location: {{ $json.city }}, Beds: {{ $json.beds }}) against buyer profiles. Find high-match buyers."
+      },
+      "id": "30ad9469-9675-5eb5-87eb-25b736a47f65",
+      "name": "Gemini Buyer Preference Match",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "@property_leads",
+        "text": "🏡 *High Match Property Match Found:*\\n{{ $json.output }}"
+      },
+      "id": "e586c1ec-67e0-5eb0-8495-c6a99db08e25",
+      "name": "Alert Agent on Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 2 Hours Schedule": {
+      "main": [
+        [
+          {
+            "node": "Fetch New Listings API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch New Listings API": {
+      "main": [
+        [
+          {
+            "node": "Gemini Buyer Preference Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Buyer Preference Match": {
+      "main": [
+        [
+          {
+            "node": "Alert Agent on Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d317ccbc-8a4c-5c4f-84f4-4b02884d5b47",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-057",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}

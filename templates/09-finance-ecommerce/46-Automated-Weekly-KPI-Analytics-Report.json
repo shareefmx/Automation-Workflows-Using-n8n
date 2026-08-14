@@ -1,0 +1,130 @@
+{
+  "name": "Automated Weekly KPI Analytics Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "432aef4f-4f34-5f23-ab99-f3593e23354f",
+      "name": "Monday 8 AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "KPI_METRICS_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Weekly",
+          "mode": "name"
+        }
+      },
+      "id": "e6a4d12f-deef-58e3-be24-95e1cb6ac6e6",
+      "name": "Collect KPI Metrics from Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create a concise weekly KPI leadership briefing with MoM trends, green/yellow/red indicators, and focus areas: {{ JSON.stringify($json) }}"
+      },
+      "id": "461e1375-2b57-5051-8336-a07ce4e3170a",
+      "name": "Gemini Executive Synthesis",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "execs@example.com",
+        "subject": "📊 Weekly Executive KPI Summary",
+        "message": "={{ $json.output }}"
+      },
+      "id": "8b639202-44f9-5a35-a727-0fbbc2220231",
+      "name": "Email Leadership Team",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Monday 8 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Collect KPI Metrics from Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect KPI Metrics from Sheets": {
+      "main": [
+        [
+          {
+            "node": "Gemini Executive Synthesis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Executive Synthesis": {
+      "main": [
+        [
+          {
+            "node": "Email Leadership Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cf245e05-9ab9-590c-8a9e-c03cbee48bc0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-046",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}

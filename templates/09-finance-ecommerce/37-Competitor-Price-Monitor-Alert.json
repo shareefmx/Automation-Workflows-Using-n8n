@@ -1,0 +1,136 @@
+{
+  "name": "Competitor Price Monitor & Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "73ed6d96-04c2-5190-9739-0fe70259ebd5",
+      "name": "Every 6 Hours Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://competitor.com/product/widget"
+      },
+      "id": "cdb424ab-2b9b-548d-906d-3c716e122171",
+      "name": "Fetch Competitor Webpage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "price",
+              "cssSelector": ".product-price",
+              "returnValue": "text"
+            }
+          ]
+        }
+      },
+      "id": "f89045b5-24ee-5322-8e79-57d159237bea",
+      "name": "Extract Price HTML",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "COMPETITOR_PRICES_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Prices",
+          "mode": "name"
+        }
+      },
+      "id": "e15d7008-e076-5b6e-8b34-356a08438c66",
+      "name": "Compare & Log in Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 6 Hours Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Competitor Webpage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Competitor Webpage": {
+      "main": [
+        [
+          {
+            "node": "Extract Price HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Price HTML": {
+      "main": [
+        [
+          {
+            "node": "Compare & Log in Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ee8fcacf-5fb0-563a-b3aa-2d87190019ed",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-037",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "name": "Shopify New Order Fulfillment & SMS Notifier",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "orders/paid"
+      },
+      "id": "77449493-86d0-5842-a6a2-6c3a17fd9ed5",
+      "name": "Shopify Order Paid Trigger",
+      "type": "n8n-nodes-base.shopifyTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "SHOPIFY_ORDERS_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Orders",
+          "mode": "name"
+        }
+      },
+      "id": "82009418-d583-5590-875d-2e9882355b97",
+      "name": "Record in Orders Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "to": "={{ $json.phone }}",
+        "message": "=Order #{{ $json.order_number }} confirmed! We are preparing your shipment. Track updates here: {{ $json.order_status_url }}"
+      },
+      "id": "3578cc72-1a21-507a-885c-1ec9777373d0",
+      "name": "Send Twilio Shipping SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Shopify Order Paid Trigger": {
+      "main": [
+        [
+          {
+            "node": "Record in Orders Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record in Orders Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Twilio Shipping SMS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "27975420-dfbf-5300-a3cd-49fe914b6a61",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-036",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}

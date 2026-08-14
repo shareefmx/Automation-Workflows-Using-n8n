@@ -1,0 +1,92 @@
+{
+  "name": "Stripe Failed Payment Recovery Dunning Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "charge.failed"
+        ]
+      },
+      "id": "57da43d3-f75b-5c06-bc2e-09ebbc12b248",
+      "name": "Stripe Charge Failed Webhook",
+      "type": "n8n-nodes-base.stripeTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.data.object.billing_details.email }}",
+        "subject": "Action Needed: Update Payment Method for Your Subscription",
+        "message": "=Hi {{ $json.data.object.billing_details.name }},\\n\\nWe were unable to process your recent payment of ${{ $json.data.object.amount / 100 }}. Please update your billing details here to avoid service interruption: https://billing.example.com"
+      },
+      "id": "03b829a3-f551-57b9-b399-1236e874d540",
+      "name": "Send Customer Dunning Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#failed-payments",
+        "text": "⚠️ Failed Charge: ${{ $json.data.object.amount / 100 }} from {{ $json.data.object.billing_details.email }}"
+      },
+      "id": "1cea9e99-bd85-5d1d-a039-36bcde886813",
+      "name": "Post to Slack Revenue Recovery",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Stripe Charge Failed Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send Customer Dunning Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Customer Dunning Email": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack Revenue Recovery",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b8307b38-e71b-5763-b3fa-e5cc56b4510a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-032",
+  "tags": [
+    {
+      "name": "01 Email Automation",
+      "id": "tag-01-email-automation"
+    }
+  ]
+}

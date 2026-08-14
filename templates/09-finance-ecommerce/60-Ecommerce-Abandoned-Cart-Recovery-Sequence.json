@@ -1,0 +1,132 @@
+{
+  "name": "E-Commerce Abandoned Cart Recovery Sequence",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cart-abandoned"
+      },
+      "id": "f12e7bf5-2cae-5617-a13d-437d5e4b1484",
+      "name": "Cart Abandoned Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "unit": "hours",
+        "amount": 2
+      },
+      "id": "d0255b09-16b8-511b-87f6-fa718c8a059f",
+      "name": "Wait 2 Hours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.completed }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "10a97f12-fc7f-5d6c-827d-b5c6b150e0b8",
+      "name": "Verify Still Unpaid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Did you forget something? Here is 10% off your cart!",
+        "message": "Hi {{ $json.body.name }}, your items are waiting. Use code RECOVER10 to complete checkout: {{ $json.body.cart_url }}"
+      },
+      "id": "a08c6f66-d6f6-5591-86bc-99dc89746f9f",
+      "name": "Send Recovery Offer Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        200
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cart Abandoned Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait 2 Hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Verify Still Unpaid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Still Unpaid": {
+      "main": [
+        [
+          {
+            "node": "Send Recovery Offer Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "92568c70-df8f-553c-9d46-afcd6fdc5e56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-060",
+  "tags": [
+    {
+      "name": "09 Finance Ecommerce",
+      "id": "tag-09-finance-ecommerce"
+    }
+  ]
+}
