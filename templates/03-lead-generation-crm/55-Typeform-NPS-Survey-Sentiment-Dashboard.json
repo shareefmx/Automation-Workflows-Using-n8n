@@ -1,0 +1,96 @@
+{
+  "name": "Typeform NPS Survey Sentiment Dashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "NPS_FORM_ID"
+      },
+      "id": "e9d914a3-0239-5083-ace6-5af3829d6148",
+      "name": "Typeform Submission Webhook",
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Evaluate NPS response score {{ $json.score }} and comment: '{{ $json.comment }}'. Recommend immediate retention steps if score < 7."
+      },
+      "id": "001ff898-a024-529b-9b91-046e9152c4ba",
+      "name": "Gemini Detractor / Promoter Tagger",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "NPS_DASHBOARD_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Scores",
+          "mode": "name"
+        }
+      },
+      "id": "a41d45a7-a2f9-56bf-b84d-a95aab316c02",
+      "name": "Update NPS Master Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Typeform Submission Webhook": {
+      "main": [
+        [
+          {
+            "node": "Gemini Detractor / Promoter Tagger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Detractor / Promoter Tagger": {
+      "main": [
+        [
+          {
+            "node": "Update NPS Master Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c74646d3-7152-512d-9cf2-e0118bc3c3da",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-055",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

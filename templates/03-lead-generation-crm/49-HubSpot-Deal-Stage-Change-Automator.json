@@ -1,0 +1,141 @@
+{
+  "name": "HubSpot Deal Stage Change Automator",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "deal.propertyChange"
+        ]
+      },
+      "id": "dcdc7bea-e7fb-57df-ace9-26635eb4d09d",
+      "name": "HubSpot Deal Stage Trigger",
+      "type": "n8n-nodes-base.hubspotTrigger",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.propertyValue }}",
+              "rightValue": "closedwon",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "2b63ae40-9454-5731-bdb3-18e17035e6df",
+      "name": "Check Won Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#sales-wins",
+        "text": "🎉 *DEAL CLOSED WON!* Deal ID: {{ $json.objectId }}"
+      },
+      "id": "2e6cad9e-1fbf-512c-97d1-a3636e1f6852",
+      "name": "Celebrate Closed Deal in Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "WON_DEALS_SHEET",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Wins",
+          "mode": "name"
+        }
+      },
+      "id": "75f0239b-f944-5ff4-9fdf-2c602300ad34",
+      "name": "Log in Won Deals Ledger",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        400
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HubSpot Deal Stage Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Won Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Won Status": {
+      "main": [
+        [
+          {
+            "node": "Celebrate Closed Deal in Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Celebrate Closed Deal in Slack": {
+      "main": [
+        [
+          {
+            "node": "Log in Won Deals Ledger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bf36442f-8188-5560-93f8-d777ea379c91",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-049",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "name": "Voice Memo to Todoist Task Converter",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "daa7fc8e-4e32-523f-ba6a-b861fadf3d48",
+      "name": "Telegram Voice Note Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getFile",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "id": "c1f14de3-8024-53ed-a204-e092775b229a",
+      "name": "Download Audio Memo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract task from voice note: { task_name: string, due_date: string, priority: [1,2,3,4] }"
+      },
+      "id": "66f74b0b-d77b-5b9a-a764-04b42ab66916",
+      "name": "Gemini Voice Task Extractor",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "content": "={{ $json.task_name }}",
+        "dueString": "={{ $json.due_date }}"
+      },
+      "id": "8db61154-01c3-5ab1-8fa7-8fce5d1fea9d",
+      "name": "Create Todoist Task",
+      "type": "n8n-nodes-base.todoist",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Voice Note Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Audio Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio Memo": {
+      "main": [
+        [
+          {
+            "node": "Gemini Voice Task Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Voice Task Extractor": {
+      "main": [
+        [
+          {
+            "node": "Create Todoist Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "981f93b3-36cb-53ae-a074-bab5059c03b5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-048",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

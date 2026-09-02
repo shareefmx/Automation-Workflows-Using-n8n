@@ -1,0 +1,95 @@
+{
+  "name": "Jira Sprint Digest & Blocker Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "ca3cfa5b-681d-544a-991b-a53b51897b5b",
+      "name": "Daily 9:30 AM Sprint Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "jql": "sprint in openSprints() AND (status = 'Blocked' OR flag = 'Impediment')"
+      },
+      "id": "b4fab5d1-d4e5-55ce-9122-85fc081064d4",
+      "name": "Fetch Blocked Jira Issues",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#dev-sprint",
+        "text": "🚧 *Sprint Impediments Found:*\\n{{ $json.key }}: {{ $json.fields.summary }} (Assigned: {{ $json.fields.assignee.displayName }})"
+      },
+      "id": "063fadd3-cfd3-5590-b7d6-66bbac23f3e8",
+      "name": "Broadcast Blockers to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 9:30 AM Sprint Check": {
+      "main": [
+        [
+          {
+            "node": "Fetch Blocked Jira Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Blocked Jira Issues": {
+      "main": [
+        [
+          {
+            "node": "Broadcast Blockers to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f2fb9cba-6891-5f60-bd18-b7cd5450c626",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-047",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

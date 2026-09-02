@@ -1,0 +1,116 @@
+{
+  "name": "Notion Knowledge Base RAG Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ]
+      },
+      "id": "c07cea78-8dd3-5bac-8296-53ee72cca414",
+      "name": "Telegram Question Received",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": "NOTION_KNOWLEDGE_BASE_ID"
+      },
+      "id": "8278210e-56d5-5be7-abd9-ee8bbeb9023b",
+      "name": "Retrieve Notion Knowledge Base",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Context from Notion Company Knowledge Base:\\n{{ $json.results }}\\n\\nQuestion: {{ $('Telegram Question Received').item.json.message.text }}\\nAnswer factually with direct citations."
+      },
+      "id": "c9c9f4f0-dd95-5587-b25a-53cefa802e5b",
+      "name": "Gemini RAG Reasoning Engine",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "={{ $('Telegram Question Received').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}"
+      },
+      "id": "5387fcfb-eb6e-5ff0-9977-13e75cdf45d3",
+      "name": "Send Telegram Answer",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Question Received": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Notion Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Notion Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "Gemini RAG Reasoning Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini RAG Reasoning Engine": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a41242bb-8017-5f72-9083-2596cbbcb60b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-061",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

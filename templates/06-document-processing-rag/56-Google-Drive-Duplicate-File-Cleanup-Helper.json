@@ -1,0 +1,121 @@
+{
+  "name": "Google Drive Duplicate File Cleanup Helper",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "25a6f6c8-781d-5a78-936c-5c810f269134",
+      "name": "Weekly Drive Scan Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "list",
+        "useSharedDrive": true
+      },
+      "id": "4c1d72eb-e17b-5ecf-8f79-507aca800382",
+      "name": "List All Files in Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nconst seen = new Map();\nconst duplicates = [];\nfor (const item of items) {\n  const hash = item.json.md5Checksum || item.json.name;\n  if (seen.has(hash)) {\n    duplicates.push({ original: seen.get(hash), duplicate: item.json });\n  } else {\n    seen.set(hash, item.json);\n  }\n}\nreturn [{ json: { duplicates, count: duplicates.length } }];"
+      },
+      "id": "86b78b93-7c58-5faf-8bd7-f7bc3b61850b",
+      "name": "Detect Duplicate Checksums",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "admin@example.com",
+        "subject": "🧹 Google Drive Duplicate Audit Results",
+        "message": "Found {{ $json.count }} potential duplicates for review."
+      },
+      "id": "0a60486f-b1bd-565a-84b9-289c71a45834",
+      "name": "Email IT Cleanup Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly Drive Scan Schedule": {
+      "main": [
+        [
+          {
+            "node": "List All Files in Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List All Files in Drive": {
+      "main": [
+        [
+          {
+            "node": "Detect Duplicate Checksums",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Duplicate Checksums": {
+      "main": [
+        [
+          {
+            "node": "Email IT Cleanup Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7dee4c59-2559-5ff2-a051-be6faec2020d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-056",
+  "tags": [
+    {
+      "name": "06 Document Processing Rag",
+      "id": "tag-06-document-processing-rag"
+    }
+  ]
+}

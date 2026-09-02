@@ -1,0 +1,131 @@
+{
+  "name": "LinkedIn Connection Request Follow-Up Scheduler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "linkedin-connected"
+      },
+      "id": "0925f861-c7fe-54b9-bc08-2cf9a7e5ed94",
+      "name": "Connection Accepted Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "OUTBOUND_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Outreach",
+          "mode": "name"
+        }
+      },
+      "id": "5cd27788-4b27-5d8e-aa97-0cbf0e825e48",
+      "name": "Log in Outbound Sequences Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "unit": "days",
+        "amount": 3
+      },
+      "id": "29d680b6-aad6-58a5-89b6-c981f2b430af",
+      "name": "Wait 3 Business Days",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "OUTBOUND_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Outreach",
+          "mode": "name"
+        }
+      },
+      "id": "b63b75ca-7a3d-5347-bcd4-a22d45cd0529",
+      "name": "Dispatch Tailored Follow-up Note",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Connection Accepted Webhook": {
+      "main": [
+        [
+          {
+            "node": "Log in Outbound Sequences Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log in Outbound Sequences Sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait 3 Business Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 3 Business Days": {
+      "main": [
+        [
+          {
+            "node": "Dispatch Tailored Follow-up Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bb147581-2227-5ad6-8b0d-1343e7a175fb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-059",
+  "tags": [
+    {
+      "name": "03 Lead Generation Crm",
+      "id": "tag-03-lead-generation-crm"
+    }
+  ]
+}

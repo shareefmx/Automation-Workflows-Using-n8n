@@ -1,0 +1,141 @@
+{
+  "name": "Autonomous AI Deep Web Research Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deep-research",
+        "responseMode": "lastNode"
+      },
+      "id": "374897a6-9a02-50e1-81c1-dc3ea197f443",
+      "name": "Research Query Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json?q={{ encodeURIComponent($json.body.topic) }}&engine=google"
+      },
+      "id": "6f1ad5d9-b1cd-5659-a52e-a0933f604b13",
+      "name": "SerpAPI Web Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Conduct in-depth market research analysis on '{{ $('Research Query Webhook').item.json.body.topic }}' using search results: {{ JSON.stringify($json.organic_results) }}. Include executive summary, competitor matrix, market trends, and risk factors."
+      },
+      "id": "6e01d1fc-435b-5f41-89be-325594d8493a",
+      "name": "Gemini Deep Synthesis Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "name": "=Deep Research - {{ $('Research Query Webhook').item.json.body.topic }}.doc"
+      },
+      "id": "f0d6c3fc-cca1-5514-9d8d-3ace8f7cba43",
+      "name": "Create Research Brief in Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"completed\", \"summary\": \"{{ $('Gemini Deep Synthesis Agent').item.json.output }}\"}"
+      },
+      "id": "af8f6214-6fe2-5f74-89d8-9b0e410c1f6a",
+      "name": "Return Completed Report Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Research Query Webhook": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI Web Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI Web Search": {
+      "main": [
+        [
+          {
+            "node": "Gemini Deep Synthesis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Deep Synthesis Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Research Brief in Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Research Brief in Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Return Completed Report Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f7343e8b-d357-5a78-b188-fd35b3ecf063",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-062",
+  "tags": [
+    {
+      "name": "07 Social Media Marketing",
+      "id": "tag-07-social-media-marketing"
+    }
+  ]
+}

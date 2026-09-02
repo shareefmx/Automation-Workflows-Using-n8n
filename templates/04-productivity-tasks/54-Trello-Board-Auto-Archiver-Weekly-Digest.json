@@ -1,0 +1,122 @@
+{
+  "name": "Trello Board Auto-Archiver & Weekly Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "e01921dc-ba84-5afb-880e-76f9722e81af",
+      "name": "Friday 5 PM Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "listId": "TRELLO_DONE_LIST_ID"
+      },
+      "id": "a2a9f200-a2c8-55c7-a24b-5da330190061",
+      "name": "Get Completed Cards from Trello",
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ $json.id }}",
+        "closed": true
+      },
+      "id": "96507aa7-3f1d-5f05-a27d-9e7862f4b43e",
+      "name": "Archive Completed Cards",
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "team@example.com",
+        "subject": "🎉 Weekly Team Completed Deliverables",
+        "message": "All cards in Done list archived successfully for sprint wrap."
+      },
+      "id": "118fa961-4de6-5f7f-85b9-507624cfc3ec",
+      "name": "Email Weekly Accomplishments",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Friday 5 PM Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Completed Cards from Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Completed Cards from Trello": {
+      "main": [
+        [
+          {
+            "node": "Archive Completed Cards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive Completed Cards": {
+      "main": [
+        [
+          {
+            "node": "Email Weekly Accomplishments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3dbe569c-f883-5c06-9876-23aac3a373a2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-054",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}

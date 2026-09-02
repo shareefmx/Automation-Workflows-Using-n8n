@@ -1,0 +1,92 @@
+{
+  "name": "Multi-Language Webhook FAQ Assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "api/v1/ask-faq",
+        "responseMode": "lastNode"
+      },
+      "id": "8ea4db5a-34ef-538c-b34c-8026cd996277",
+      "name": "Inbound FAQ API Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Answer question based on verified product knowledge base: {{ $json.body.question }}"
+      },
+      "id": "294f073a-3de0-56dd-98bd-701533a68aa3",
+      "name": "Gemini Knowledge Base Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "{\"status\": 200, \"answer\": \"{{ $json.output }}\"}"
+      },
+      "id": "fb99a65d-0bb6-5c44-aa21-6d221ee61758",
+      "name": "Return JSON API Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Inbound FAQ API Request": {
+      "main": [
+        [
+          {
+            "node": "Gemini Knowledge Base Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Knowledge Base Agent": {
+      "main": [
+        [
+          {
+            "node": "Return JSON API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c8462a60-4e86-53d2-99bc-ddd81fb81848",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-052",
+  "tags": [
+    {
+      "name": "05 Chatbots Telegram Whatsapp",
+      "id": "tag-05-chatbots-telegram-whatsapp"
+    }
+  ]
+}

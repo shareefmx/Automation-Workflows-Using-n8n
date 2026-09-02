@@ -1,0 +1,117 @@
+{
+  "name": "Employee Onboarding Automation Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new-hire-onboarding"
+      },
+      "id": "d7a394e3-3477-5807-97f1-50fb2b65fd0c",
+      "name": "New Hire Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "postMessage",
+        "channel": "#hr-internal",
+        "text": "👋 Starting onboarding for {{ $json.body.first_name }} {{ $json.body.last_name }} (Role: {{ $json.body.role }})"
+      },
+      "id": "b297b91f-e219-5ec4-a978-0d2ce86950b4",
+      "name": "Create Slack User Account / Invite",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": "NOTION_ONBOARDING_DB"
+      },
+      "id": "69911d68-621c-5d3b-9b76-f7778f81096e",
+      "name": "Provision Notion Onboarding Hub",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "sendTo": "={{ $json.body.personal_email }}",
+        "subject": "Welcome to the Team! 🚀 Your First Week Guide",
+        "message": "Hi {{ $json.body.first_name }}, we are thrilled to welcome you! Check your onboarding plan here."
+      },
+      "id": "6148e3a7-ea75-5a83-8a9a-19b2518c475a",
+      "name": "Send Welcome Kit Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Hire Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Slack User Account / Invite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Slack User Account / Invite": {
+      "main": [
+        [
+          {
+            "node": "Provision Notion Onboarding Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Provision Notion Onboarding Hub": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Kit Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f70c3954-11af-574d-8048-7070ef01def5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "awesome-n8n-collection"
+  },
+  "id": "wf-058",
+  "tags": [
+    {
+      "name": "04 Productivity Tasks",
+      "id": "tag-04-productivity-tasks"
+    }
+  ]
+}
