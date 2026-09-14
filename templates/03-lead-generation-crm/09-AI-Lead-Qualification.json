@@ -3,6 +3,26 @@
   "nodes": [
     {
       "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "01aaa319-95a4-5430-b559-21ad023a9fbf",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        120,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "operation": "read",
         "documentId": {
           "__rl": true,
@@ -20,7 +40,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        220,
+        340,
         300
       ]
     },
@@ -51,7 +71,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        440,
+        560,
         300
       ]
     },
@@ -65,7 +85,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        660,
+        780,
         300
       ]
     },
@@ -88,13 +108,24 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        880,
+        1000,
         300
       ]
     }
   ],
   "pinData": {},
   "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Poll Unqualified Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Poll Unqualified Leads": {
       "main": [
         [

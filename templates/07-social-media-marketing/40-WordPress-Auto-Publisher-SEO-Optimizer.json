@@ -3,6 +3,26 @@
   "nodes": [
     {
       "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "67f84655-1f5b-56d7-9305-7abb85aa52c5",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        120,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "operation": "read",
         "documentId": {
           "__rl": true,
@@ -20,7 +40,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        220,
+        340,
         300
       ]
     },
@@ -34,7 +54,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        440,
+        560,
         300
       ]
     },
@@ -49,13 +69,24 @@
       "type": "n8n-nodes-base.wordpress",
       "typeVersion": 1,
       "position": [
-        660,
+        780,
         300
       ]
     }
   ],
   "pinData": {},
   "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "New Topic in Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "New Topic in Sheets": {
       "main": [
         [
