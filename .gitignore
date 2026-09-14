@@ -30,3 +30,7 @@ Thumbs.db
 .env.local
 *.pem
 credentials.json
+
+# Internal scripts & tooling
+scripts/
+
